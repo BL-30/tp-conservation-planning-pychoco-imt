@@ -11,8 +11,8 @@ class ConservationPlanningModel:
 
         # TODO
         # -- Init variables here -- #
-        self.selected = None
-        self.nb_pus = None
+        self.selected = [self.model.int_var(0, 1, "selected_{}".format(i)) for i in range(0, N)]
+        self.nb_pus = self.model.int_var(0, N, "nb_pus")
         self.occ_tree_A = None
         self.occ_tree_B = None
         self.occ_tree_C = None
@@ -31,10 +31,24 @@ class ConservationPlanningModel:
 
     def post_base_model_constraints(self):
         # TODO
-        pass
+        # -- Post base model constraints here -- #
+        self.model.sum(self.selected, self.nb_pus).post()
+        for i in range(0, N):
+            self.model.sum([self.selected[j] for j in get_neighbors(i)], self.selected[i]).post()
+        for i in range(0, N):
+            self.model.sum([self.selected[i] * OCC_TREE_A[i] for i in range(0, N)], self.occ_tree_A).post()
+            self.model.sum([self.selected[i] * OCC_TREE_B[i] for i in range(0, N)], self.occ_tree_B).post()
+            self.model.sum([self.selected[i] * OCC_TREE_C[i] for i in range(0, N)], self.occ_tree_C).post()
+            self.model.sum([self.selected[i] * OCC_TREE_D[i] for i in range(0, N)], self.occ_tree_D).post()
+            self.model.sum([self.selected[i] * OCC_FERN[i] for i in range(0, N)], self.occ_fern).post()
+            self.model.sum([self.selected[i] * OCC_BIRD[i] for i in range(0, N)], self.occ_bird).post()
+            self.model.sum([self.selected[i] * OCC_GECKO[i] for i in range(0, N)], self.occ_gecko).post()
+        # -- End post base model constraints -- #
+        
 
     def solve_step_1(self) -> Solution:
         # TODO
+        
         pass
 
     def solve_step_2(self) -> Solution:
